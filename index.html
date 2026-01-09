@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Novela gráfica interactiva con múltiples finales. Toma decisiones y descubre tu destino.">
+  <title>El Misterio de la Mansión Vega | Novela Gráfica Interactiva</title>
+  
+  <!-- Fuentes -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Estilos -->
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/comic.css">
+  
+  <style>
+    /* Estilos específicos de la página de login */
+    .login-page {
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 2rem;
+    }
+    
+    .login-container {
+      width: 100%;
+      max-width: 450px;
+    }
+    
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    
+    .login-header .logo {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+      animation: float 3s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    
+    .login-header h1 {
+      font-size: clamp(2rem, 6vw, 3rem);
+      margin-bottom: 0.5rem;
+    }
+    
+    .login-header p {
+      color: var(--text-secondary);
+      font-size: 1.1rem;
+    }
+    
+    .login-card {
+      background: var(--bg-card);
+      border: 3px solid var(--comic-border);
+      border-radius: 25px;
+      padding: 2.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .login-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 5px;
+      background: linear-gradient(90deg, var(--primary), var(--secondary), var(--accent));
+    }
+    
+    .tabs {
+      display: flex;
+      margin-bottom: 2rem;
+      background: var(--bg-panel);
+      border-radius: 15px;
+      padding: 5px;
+    }
+    
+    .tab-btn {
+      flex: 1;
+      padding: 1rem;
+      background: transparent;
+      border: none;
+      color: var(--text-secondary);
+      font-family: 'Bangers', sans-serif;
+      font-size: 1.1rem;
+      letter-spacing: 2px;
+      cursor: pointer;
+      border-radius: 12px;
+      transition: all 0.3s ease;
+    }
+    
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    
+    .tab-btn:hover:not(.active) {
+      color: var(--text-primary);
+    }
+    
+    .form-container {
+      position: relative;
+    }
+    
+    .auth-form {
+      display: none;
+    }
+    
+    .auth-form.active {
+      display: block;
+      animation: fadeIn 0.4s ease;
+    }
+    
+    .divider {
+      display: flex;
+      align-items: center;
+      margin: 1.5rem 0;
+      color: var(--text-muted);
+    }
+    
+    .divider::before,
+    .divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--comic-border);
+    }
+    
+    .divider span {
+      padding: 0 1rem;
+      font-size: 0.9rem;
+    }
+    
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1rem;
+      margin-top: 3rem;
+      text-align: center;
+    }
+    
+    .feature {
+      padding: 1rem;
+    }
+    
+    .feature-icon {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .feature-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+    
+    /* Decoración de cómic */
+    .comic-decoration {
+      position: fixed;
+      font-family: 'Bangers', sans-serif;
+      color: var(--primary);
+      opacity: 0.1;
+      pointer-events: none;
+      z-index: -1;
+    }
+    
+    .decoration-1 {
+      top: 10%;
+      left: 5%;
+      font-size: 8rem;
+      transform: rotate(-15deg);
+    }
+    
+    .decoration-2 {
+      bottom: 15%;
+      right: 5%;
+      font-size: 6rem;
+      transform: rotate(10deg);
+    }
+    
+    @media (max-width: 480px) {
+      .login-card {
+        padding: 1.5rem;
+      }
+      
+      .features {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+      }
+      
+      .feature {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        text-align: left;
+      }
+      
+      .feature-icon {
+        margin-bottom: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Decoraciones de fondo -->
+  <div class="comic-decoration decoration-1">POW!</div>
+  <div class="comic-decoration decoration-2">BOOM!</div>
+  
+  <main class="login-page">
+    <div class="login-container">
+      <!-- Header -->
+      <header class="login-header fade-in">
+        <div class="logo">🔍</div>
+        <h1>El Misterio de la Mansión Vega</h1>
+        <p>Una novela gráfica interactiva</p>
+      </header>
+      
+      <!-- Card de Login -->
+      <div class="login-card fade-in" style="animation-delay: 0.2s;">
+        <!-- Tabs -->
+        <div class="tabs">
+          <button class="tab-btn active" data-tab="login">Iniciar Sesión</button>
+          <button class="tab-btn" data-tab="register">Registrarse</button>
+        </div>
+        
+        <!-- Mensaje de error/éxito -->
+        <div id="auth-message" class="hidden"></div>
+        
+        <!-- Formularios -->
+        <div class="form-container">
+          <!-- Login Form -->
+          <form id="login-form" class="auth-form active">
+            <div class="form-group">
+              <label for="login-email">Email</label>
+              <input type="email" id="login-email" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+              <label for="login-password">Contraseña</label>
+              <input type="password" id="login-password" placeholder="••••••••" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              <span>Entrar a la Aventura</span>
+              <span>→</span>
+            </button>
+          </form>
+          
+          <!-- Register Form -->
+          <form id="register-form" class="auth-form">
+            <div class="form-group">
+              <label for="register-email">Email</label>
+              <input type="email" id="register-email" placeholder="tu@email.com" required>
+            </div>
+            <div class="form-group">
+              <label for="register-password">Contraseña</label>
+              <input type="password" id="register-password" placeholder="Mínimo 6 caracteres" required minlength="6">
+            </div>
+            <div class="form-group">
+              <label for="register-confirm">Confirmar Contraseña</label>
+              <input type="password" id="register-confirm" placeholder="Repite tu contraseña" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+              <span>Crear Cuenta</span>
+              <span>→</span>
+            </button>
+          </form>
+        </div>
+        
+        <div class="divider">
+          <span>o continúa como invitado</span>
+        </div>
+        
+        <button id="guest-btn" class="btn btn-secondary" style="width: 100%;">
+          Jugar sin cuenta
+        </button>
+      </div>
+      
+      <!-- Features -->
+      <div class="features fade-in" style="animation-delay: 0.4s;">
+        <div class="feature">
+          <div class="feature-icon">📖</div>
+          <div class="feature-text">Historia interactiva</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">🔀</div>
+          <div class="feature-text">Múltiples finales</div>
+        </div>
+        <div class="feature">
+          <div class="feature-icon">💾</div>
+          <div class="feature-text">Guarda tu progreso</div>
+        </div>
+      </div>
+    </div>
+  </main>
+  
+  <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

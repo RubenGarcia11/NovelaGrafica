@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description"
+        content="El Misterio de la Mansión Vega - Una novela gráfica interactiva donde tus decisiones determinan el final.">
+    <title>El Misterio de la Mansión Vega | Novela Gráfica</title>
+    <script>
+        // Trap global errors for debugging
+        window.onerror = function (msg, url, line, col, error) {
+            const errorMsg = `❌ Error: ${msg}\nLine: ${line}\nFile: ${url}`;
+            console.error(errorMsg);
+            // alert(errorMsg); // Uncomment if desperate
+
+            // Show in DOM if body exists
+            if (document.body) {
+                let errBox = document.getElementById('fatal-error');
+                if (!errBox) {
+                    errBox = document.createElement('div');
+                    errBox.id = 'fatal-error';
+                    errBox.style = 'position:fixed;top:0;left:0;width:100%;height:100%;background:black;color:red;z-index:9999;padding:2rem;font-family:monospace;white-space:pre-wrap;';
+                    document.body.appendChild(errBox);
+                }
+                errBox.textContent += errorMsg + '\n\n';
+            }
+        };
+    </script>
+
+    <!-- Fuentes -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bangers&family=Comic+Neue:wght@400;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Estilos -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/comic.css">
+
+    <style>
+        /* Header de la aplicación */
+        .app-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 70px;
+            background: rgba(15, 15, 26, 0.95);
+            backdrop-filter: blur(10px);
+            border-bottom: 2px solid var(--comic-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 2rem;
+            z-index: 100;
+        }
+
+        .app-logo {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .app-logo-icon {
+            font-size: 2rem;
+        }
+
+        .app-logo h1 {
+            font-family: 'Bangers', sans-serif;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .app-nav {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-btn {
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-panel);
+            border: 2px solid var(--comic-border);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-family: 'Outfit', sans-serif;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--primary);
+            background: var(--primary);
+        }
+
+        .nav-btn.danger:hover {
+            border-color: var(--secondary);
+            background: var(--secondary);
+        }
+
+
+        /* Login Modal */
+        .login-modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 3000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .login-modal-overlay.active {
+            opacity: 1;
+            pointer-events: all;
+        }
+
+        .login-card {
+            background: var(--bg-card);
+            border: 2px solid var(--primary);
+            width: 90%;
+            max-width: 400px;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 0 30px rgba(99, 102, 241, 0.3);
+            text-align: center;
+        }
+
+        .login-title {
+            font-family: 'Bangers', cursive;
+            font-size: 2rem;
+            color: var(--primary);
+            margin-bottom: 1.5rem;
+            text-shadow: 2px 2px 0 #000;
+        }
+
+        .login-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            background: var(--bg-dark);
+            border: 1px solid var(--comic-border);
+            color: white;
+            border-radius: 6px;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .login-input:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .login-btn {
+            width: 100%;
+            padding: 12px;
+            font-weight: bold;
+            margin-bottom: 1rem;
+            transition: all 0.2s;
+        }
+
+        .divider {
+            margin: 1.5rem 0;
+            border-top: 1px solid var(--comic-border);
+            position: relative;
+        }
+
+        .divider span {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-card);
+            padding: 0 10px;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+        }
+
+
+        /* Menú lateral */
+        .side-menu {
+            position: fixed;
+            top: 70px;
+            right: -350px;
+            width: 350px;
+            height: calc(100vh - 70px);
+            background: var(--bg-card);
+            border-left: 2px solid var(--comic-border);
+            padding: 2rem;
+            transition: right 0.3s ease;
+            z-index: 99;
+            overflow-y: auto;
+        }
+
+        .side-menu.open {
+            right: 0;
+        }
+
+        .side-menu h3 {
+            font-family: 'Bangers', sans-serif;
+            font-size: 1.5rem;
+            margin-bottom: 1.5rem;
+            color: var(--accent);
+        }
+
+        .menu-section {
+            margin-bottom: 2rem;
+        }
+
+        .menu-section h4 {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1rem;
+        }
+
+        .stat-card {
+            background: var(--bg-panel);
+            padding: 1rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-family: 'Bangers', sans-serif;
+            font-size: 2rem;
+            color: var(--primary);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .ending-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .ending-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background: var(--bg-panel);
+            border-radius: 10px;
+            opacity: 0.5;
+        }
+
+        .ending-item.unlocked {
+            opacity: 1;
+            border: 2px solid var(--primary);
+        }
+
+        .ending-icon {
+            font-size: 1.5rem;
+        }
+
+        .ending-name {
+            font-weight: 600;
+        }
+
+        /* Loading screen */
+        .loading-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: var(--bg-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            transition: opacity 0.5s ease;
+        }
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-text {
+            margin-top: 2rem;
+            font-family: 'Bangers', sans-serif;
+            font-size: 1.5rem;
+            color: var(--text-secondary);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 0.5;
+            }
+
+            50% {
+                opacity: 1;
+            }
+        }
+
+        /* Overlay para menú */
+        .menu-overlay {
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 98;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 768px) {
+            .app-header {
+                padding: 0 1rem;
+            }
+
+            .app-logo h1 {
+                font-size: 1.1rem;
+            }
+
+            .nav-btn span:not(.btn-icon) {
+                display: none;
+            }
+
+            .side-menu {
+                width: 100%;
+                right: -100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Loading Screen -->
+    <div class="loading-screen" id="loading-screen">
+        <div class="spinner"></div>
+        <p class="loading-text">Cargando tu aventura...</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+        <div class="progress-bar-fill" style="width: 0%"></div>
+    </div>
+
+    <!-- Header -->
+    <header class="app-header">
+        <div class="app-logo">
+            <span class="app-logo-icon">🔍</span>
+            <h1>La Mansión Vega</h1>
+        </div>
+        <nav class="app-nav">
+            <button class="nav-btn" id="menu-btn">
+                <span class="btn-icon">📊</span>
+                <span>Progreso</span>
+            </button>
+            <button class="nav-btn danger" id="logout-btn">
+                <span class="btn-icon">🚪</span>
+                <span>Salir</span>
+            </button>
+        </nav>
+    </header>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menu-overlay"></div>
+
+    <!-- Side Menu -->
+    <aside class="side-menu" id="side-menu">
+        <h3>Tu Progreso</h3>
+
+        <div class="menu-section">
+            <h4>Estadísticas</h4>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="decisions-count">0</div>
+                    <div class="stat-label">Decisiones</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="endings-count">0/4</div>
+                    <div class="stat-label">Finales</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h4>Inventario</h4>
+            <div class="inventory-grid" id="inventory-grid">
+                <div class="inventory-empty">Sin objetos</div>
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <h4>Finales Desbloqueados</h4>
+            <div class="ending-list" id="ending-list">
+                <!-- Se llena dinámicamente -->
+            </div>
+        </div>
+
+        <div class="menu-section">
+            <button class="btn btn-secondary" style="width: 100%;" onclick="restartStory()">
+                🔄 Reiniciar historia
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="app-main">
+        <div class="comic-container" id="comic-container">
+            <!-- El contenido se genera dinámicamente -->
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"
+        crossorigin="anonymous"></script>
+    <script>
+        if (typeof supabase === 'undefined') {
+            console.error('⚠️ Supabase library failed to load!');
+        }
+    </script>
+    <script src="js/supabase.js"></script>
+
+    <!-- Login Modal -->
+    <div id="login-modal" class="login-modal-overlay">
+        <div class="login-card">
+            <h2 class="login-title">🕵️ ARCHIVO SECRETO</h2>
+
+            <div id="login-form-container">
+                <input type="email" id="auth-email" class="login-input" placeholder="Correo de Agente">
+                <input type="password" id="auth-password" class="login-input" placeholder="Código de Acceso">
+
+                <button id="login-submit-btn" class="btn btn-primary login-btn">ACCEDER AL SISTEMA</button>
+                <button id="register-submit-btn" class="btn btn-secondary login-btn">REGISTRAR NUEVO AGENTE</button>
+
+                <div class="divider">
+                    <span>O</span>
+                </div>
+            </div>
+
+            <button id="guest-btn" class="btn login-btn"
+                style="background: transparent; border: 1px dashed var(--text-muted); color: var(--text-muted);">
+                ENTRAR COMO INVITADO (Sin guardar en nube)
+            </button>
+            <p id="auth-error" style="color: #ef4444; margin-top: 1rem; display: none;"></p>
+        </div>
+    </div>
+
+    <!-- Tutorial Modal -->
+    <div id="tutorial-modal" class="tutorial-modal hidden">
+        <div class="tutorial-content">
+            <div class="tutorial-header">
+                <h2>📁 EXPEDIENTE VEGA: CONFIDENCIAL</h2>
+            </div>
+            <div class="tutorial-body">
+                <p>Bienvenido, detective. Antes de iniciar su investigación, revise el protocolo:</p>
+                <ul>
+                    <li>👁️ <strong>Observe:</strong> Las pistas están en los detalles de las viñetas.</li>
+                    <li>🗣️ <strong>Decida:</strong> Sus elecciones alteran el curso de la historia.</li>
+                    <li>🎒 <strong>Recolecte:</strong> Los objetos clave se guardarán en su inventario.</li>
+                    <li>🔊 <strong>Escuche:</strong> Los efectos de sonido revelan peligros ocultos.</li>
+                </ul>
+                <p class="tutorial-tip">Advertencia: Algunas decisiones son irreversibles.</p>
+            </div>
+            <button class="tutorial-close-btn" id="close-tutorial-btn">ENTENDIDO</button>
+        </div>
+    </div>
+
+    <script src="js/story.js"></script>
+    <script src="js/app.js"></script>
+
+    <script>
+        // Ocultar loading screen después de cargar
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                document.getElementById('loading-screen').classList.add('hidden');
+            }, 500);
+        });
+
+        // Toggle del menú lateral
+        const menuBtn = document.getElementById('menu-btn');
+        const sideMenu = document.getElementById('side-menu');
+        const menuOverlay = document.getElementById('menu-overlay');
+
+        menuBtn.addEventListener('click', () => {
+            sideMenu.classList.toggle('open');
+            menuOverlay.classList.toggle('active');
+            updateMenuStats();
+        });
+
+        menuOverlay.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('active');
+        });
+
+        // Actualizar estadísticas del menú
+        function updateMenuStats() {
+            const decisionsCount = document.getElementById('decisions-count');
+            const endingsCount = document.getElementById('endings-count');
+            const endingList = document.getElementById('ending-list');
+
+            if (window.appState) {
+                decisionsCount.textContent = window.appState?.decisions?.length || 0;
+                endingsCount.textContent = `${window.appState?.completedEndings?.length || 0}/3`;
+            }
+
+            // Actualizar lista de finales
+            if (window.STORY_META && endingList) {
+                endingList.innerHTML = Object.entries(window.STORY_META.endings).map(([id, ending]) => {
+                    const isUnlocked = window.appState?.completedEndings?.includes(id);
+                    return `
+            <div class="ending-item ${isUnlocked ? 'unlocked' : ''}">
+              <span class="ending-icon">${isUnlocked ? ending.icon : '❓'}</span>
+              <span class="ending-name">${isUnlocked ? ending.name : '???'}</span>
+            </div>
+          `;
+                }).join('');
+            }
+        }
+
+        // Exponer appState globalmente para el menú
+        Object.defineProperty(window, 'appState', {
+            get: function () {
+                return window._appState || { decisions: [], completedEndings: [] };
+            },
+            set: function (value) {
+                window._appState = value;
+            }
+        });
+    </script>
+</body>
+
+</html>
