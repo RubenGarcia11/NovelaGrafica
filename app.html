@@ -503,62 +503,19 @@
     <script>
         // Ocultar loading screen después de cargar
         window.addEventListener('load', () => {
+            // Solo ocultar si no hay login modal activo (para evitar flash)
+            // El login modal/initGame se encargará de esto si es necesario
+            // Pero por seguridad visual:
             setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
+                const loader = document.getElementById('loading-screen');
+                if (loader) loader.style.opacity = '0';
+                setTimeout(() => {
+                    if (loader) loader.classList.add('hidden');
+                }, 500);
             }, 500);
         });
-
-        // Toggle del menú lateral
-        const menuBtn = document.getElementById('menu-btn');
-        const sideMenu = document.getElementById('side-menu');
-        const menuOverlay = document.getElementById('menu-overlay');
-
-        menuBtn.addEventListener('click', () => {
-            sideMenu.classList.toggle('open');
-            menuOverlay.classList.toggle('active');
-            updateMenuStats();
-        });
-
-        menuOverlay.addEventListener('click', () => {
-            sideMenu.classList.remove('open');
-            menuOverlay.classList.remove('active');
-        });
-
-        // Actualizar estadísticas del menú
-        function updateMenuStats() {
-            const decisionsCount = document.getElementById('decisions-count');
-            const endingsCount = document.getElementById('endings-count');
-            const endingList = document.getElementById('ending-list');
-
-            if (window.appState) {
-                decisionsCount.textContent = window.appState?.decisions?.length || 0;
-                endingsCount.textContent = `${window.appState?.completedEndings?.length || 0}/3`;
-            }
-
-            // Actualizar lista de finales
-            if (window.STORY_META && endingList) {
-                endingList.innerHTML = Object.entries(window.STORY_META.endings).map(([id, ending]) => {
-                    const isUnlocked = window.appState?.completedEndings?.includes(id);
-                    return `
-            <div class="ending-item ${isUnlocked ? 'unlocked' : ''}">
-              <span class="ending-icon">${isUnlocked ? ending.icon : '❓'}</span>
-              <span class="ending-name">${isUnlocked ? ending.name : '???'}</span>
-            </div>
-          `;
-                }).join('');
-            }
-        }
-
-        // Exponer appState globalmente para el menú
-        Object.defineProperty(window, 'appState', {
-            get: function () {
-                return window._appState || { decisions: [], completedEndings: [] };
-            },
-            set: function (value) {
-                window._appState = value;
-            }
-        });
     </script>
+</body>
 </body>
 
 </html>

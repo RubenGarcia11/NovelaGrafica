@@ -600,26 +600,77 @@ function updateProgressBar() {
 /**
  * Configurar event listeners
  */
+/**
+ * Configurar event listeners
+ */
 function setupEventListeners() {
     // Botón de cerrar sesión
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
         logoutBtn.addEventListener('click', () => {
-            if (window.AuthService) {
-                window.AuthService.logout();
+            if (window.SupabaseService) {
+                window.SupabaseService.logout().then(() => {
+                    localStorage.removeItem('guestSession');
+                    window.location.reload();
+                });
+            } else {
+                localStorage.removeItem('guestSession');
+                window.location.reload();
             }
         });
     }
 
-    // Botón de menú
+    // Botón de menú y Overlay
     const menuBtn = document.getElementById('menu-btn');
     const sideMenu = document.getElementById('side-menu');
-    if (menuBtn && sideMenu) {
+    const menuOverlay = document.getElementById('menu-overlay');
+
+    if (menuBtn && sideMenu && menuOverlay) {
         menuBtn.addEventListener('click', () => {
             sideMenu.classList.toggle('open');
+            menuOverlay.classList.toggle('active');
+            updateMenuStats();
+        });
+
+        menuOverlay.addEventListener('click', () => {
+            sideMenu.classList.remove('open');
+            menuOverlay.classList.remove('active');
         });
     }
 }
+
+/**
+ * Actualizar estadísticas del menú
+ */
+function updateMenuStats() {
+    const decisionsCount = document.getElementById('decisions-count');
+    const endingsCount = document.getElementById('endings-count');
+    const endingList = document.getElementById('ending-list');
+
+    if (decisionsCount) {
+        decisionsCount.textContent = appState.decisions.length;
+    }
+
+    if (endingsCount && window.STORY_META) {
+        endingsCount.textContent = `${appState.completedEndings.length}/${window.STORY_META.totalEndings || 4}`;
+    }
+
+    // Actualizar lista de finales
+    if (window.STORY_META && endingList) {
+        endingList.innerHTML = Object.entries(window.STORY_META.endings).map(([id, ending]) => {
+            const isUnlocked = appState.completedEndings.includes(id);
+            return `
+    <div class="ending-item ${isUnlocked ? 'unlocked' : ''}">
+      <span class="ending-icon" style="font-size: 1.5rem;">${isUnlocked ? ending.icon : '❓'}</span>
+      <span class="ending-name" style="margin-left: 10px;">${isUnlocked ? ending.name : '???'}</span>
+    </div>
+  `;
+        }).join('');
+    }
+}
+
+// Exponer appState a la ventana global para depuración
+window.appState = appState;
 
 // Exponer funciones globales
 window.restartStory = restartStory;
